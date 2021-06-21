@@ -1,8 +1,10 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { createViewChild } from "@angular/compiler/src/core";
 import { Injectable } from "@angular/core";
-import { Observable, throwError } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { Router } from "@angular/router";
+import { Observable, Subject, throwError } from "rxjs";
+import { catchError, tap } from "rxjs/operators";
+import { UserDetails } from "./user.model";
 
 export interface AuthResponse {
   idToken: string;
@@ -15,7 +17,9 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
-  constructor(private http: HttpClient) {}
+  user$ = new Subject<UserDetails>();
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   signup(email, password) {
     const payload = {
@@ -31,6 +35,19 @@ export class AuthService {
       .pipe(
         catchError((errorRes) => {
           this.handleError(errorRes);
+        }),
+        tap((response) => {
+          let expires = new Date(
+            new Date().getTime() + response.expiresId * 1000
+          );
+          let user = new UserDetails(
+            response.localId,
+            response.email,
+            response.idToken,
+            expires
+          );
+          this.user$.next(user);
+          this.router.navigate(['/recipes']);
         })
       );
   }
@@ -49,6 +66,19 @@ export class AuthService {
       .pipe(
         catchError((errorRes) => {
           this.handleError(errorRes);
+        }),
+        tap((response) => {
+          let expires = new Date(
+            new Date().getTime() + response.expiresId * 1000
+          );
+          let user = new UserDetails(
+            response.localId,
+            response.email,
+            response.idToken,
+            expires
+          );
+          this.user$.next(user);
+          this.router.navigate(['/recipes']);
         })
       );
   }
@@ -58,5 +88,4 @@ export class AuthService {
       return throwError(err.error.error.message);
     }
   }
-
 }
