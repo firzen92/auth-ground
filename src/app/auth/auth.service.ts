@@ -1,8 +1,7 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { createViewChild } from "@angular/compiler/src/core";
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import { Observable, Subject, throwError } from "rxjs";
+import { BehaviorSubject, Subject, throwError } from "rxjs";
 import { catchError, tap } from "rxjs/operators";
 import { UserDetails } from "./user.model";
 
