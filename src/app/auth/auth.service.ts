@@ -10,7 +10,7 @@ export interface AuthResponse {
   idToken: string;
   email: string;
   refreshToken: string;
-  expiresId: string;
+  expiresIn: string;
   localId: string;
   registered?: boolean;
 }
@@ -33,21 +33,14 @@ export class AuthService {
         payload
       )
       .pipe(
-        catchError((errorRes) => {
-          this.handleError(errorRes);
-        }),
+        catchError(errorRes => this.handleError(errorRes)),
         tap((response) => {
-          let expires = new Date(
-            new Date().getTime() + response.expiresId * 1000
-          );
-          let user = new UserDetails(
+          this.handleAuthentication(
             response.localId,
             response.email,
             response.idToken,
-            expires
+            response.expiresIn
           );
-          this.user$.next(user);
-          this.router.navigate(['/recipes']);
         })
       );
   }
@@ -64,23 +57,23 @@ export class AuthService {
         payload
       )
       .pipe(
-        catchError((errorRes) => {
-          this.handleError(errorRes);
-        }),
+        catchError(errorRes => this.handleError(errorRes)),
         tap((response) => {
-          let expires = new Date(
-            new Date().getTime() + response.expiresId * 1000
-          );
-          let user = new UserDetails(
+          this.handleAuthentication(
             response.localId,
             response.email,
             response.idToken,
-            expires
+            response.expiresIn
           );
-          this.user$.next(user);
-          this.router.navigate(['/recipes']);
         })
       );
+  }
+
+  handleAuthentication(id, email, idToken, expiration) {
+    let expires = new Date(new Date().getTime() + +expiration * 1000);
+    let user = new UserDetails(id, email, idToken, expires);
+    this.user$.next(user);
+    this.router.navigate(["/recipes"]);
   }
 
   handleError(err: HttpErrorResponse) {
