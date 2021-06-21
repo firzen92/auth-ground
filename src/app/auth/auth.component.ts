@@ -12,7 +12,6 @@ export class AuthComponent {
   isLogin = true;
   isLoading = false;
   errorMessage = null;
-  authObs: Observable<AuthResponse>;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -22,12 +21,13 @@ export class AuthComponent {
 
   onSubmit(f: NgForm) {
     this.isLoading = true;
+    let authObs:Observable<AuthResponse>;
     if (!this.isLogin) {
-      this.authObs = this.authService.signup(f.value.email, f.value.password);
+      authObs = this.authService.signup(f.value.email, f.value.password);
     } else {
-      this.authObs = this.authService.login(f.value.email, f.value.password);
+      authObs = this.authService.login(f.value.email, f.value.password);
     }
-    this.authObs.subscribe(
+    authObs.subscribe(
       (res) => {
         this.isLoading = false;
       },
