@@ -8,12 +8,12 @@ import { AuthResponse, AuthService } from "./auth.service";
   selector: "app-auth",
   templateUrl: "./auth.component.html",
 })
-export class AuthComponent {
+export class AuthComponent{
   isLogin = true;
   isLoading = false;
   errorMessage = null;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   switchToggle() {
     this.isLogin = !this.isLogin;
