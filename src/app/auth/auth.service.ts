@@ -80,4 +80,10 @@ export class AuthService {
       return throwError(err.error.error.message);
     }
   }
+
+  logout() {
+    this.user$.next(null);
+    this.router.navigate(['/auth']);
+  }
+
 }
