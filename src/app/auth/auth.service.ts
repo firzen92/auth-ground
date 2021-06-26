@@ -18,7 +18,25 @@ export interface AuthResponse {
 export class AuthService {
   user$ = new BehaviorSubject<UserDetails>(null);
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) { }
+
+
+  autoLogin() {
+    let user: AuthResponse = JSON.parse(localStorage.getItem('userDetails'));
+    if (!user) {
+      return;
+    }
+    
+    let userDetails = new UserDetails(user.localId, user.email, user.idToken, new Date(new Date().getTime() + +user.expiresIn * 1000));
+
+    if(!userDetails.token) {
+      return;
+    }
+
+    this.user$.next(userDetails);
+  }
+
+
 
   signup(email, password) {
     const payload = {
@@ -58,6 +76,7 @@ export class AuthService {
       .pipe(
         catchError(errorRes => this.handleError(errorRes)),
         tap((response) => {
+          localStorage.setItem('userDetails', JSON.stringify(response));
           this.handleAuthentication(
             response.localId,
             response.email,
