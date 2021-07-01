@@ -17,6 +17,7 @@ export interface AuthResponse {
 @Injectable({ providedIn: "root" })
 export class AuthService {
   user$ = new BehaviorSubject<UserDetails>(null);
+  logoutTimer: any;
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -32,10 +33,15 @@ export class AuthService {
     if(!userDetails.token) {
       return;
     }
-
+    this.autoLogout(user.expiresIn);
     this.user$.next(userDetails);
   }
 
+  autoLogout(expirationTime) {
+    this.logoutTimer = setTimeout(() => {
+      this.logout();
+    }, expirationTime* 1000);
+  }
 
 
   signup(email, password) {
@@ -92,6 +98,7 @@ export class AuthService {
     let user = new UserDetails(id, email, idToken, expires);
     this.user$.next(user);
     this.router.navigate(["/recipes"]);
+    this.autoLogout(expiration);
   }
 
   handleError(err: HttpErrorResponse) {
@@ -103,6 +110,11 @@ export class AuthService {
   logout() {
     this.user$.next(null);
     this.router.navigate(['/auth']);
+    localStorage.removeItem('userDetails');
+    if(this.logoutTimer) {
+      clearTimeout(this.logoutTimer);
+      this.logoutTimer = null;
+    }
   }
 
 }
